@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CACHE MEMORY SIMULATOR</title>
+    <link rel="icon" href="image.png" type="image/png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Orbitron', monospace;
+            background: #0a0a0a;
+            color: #00ff88;
+            min-height: 100vh;
+            overflow-x: auto;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(0, 255, 136, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 136, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(0, 136, 255, 0.1) 0%, transparent 50%);
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #00ff88;
+            padding-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 2.8em;
+            font-weight: 900;
+            color: #00ff88;
+            text-shadow: 0 0 20px #00ff88;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            color: #ff8800;
+            font-size: 1.1em;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+        
+        .header .institution {
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid #00ff88;
+            border-radius: 10px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .control-group label {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #00ff88;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .control-group input, .control-group select {
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            color: #00ff88;
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .control-group input:focus, .control-group select:focus {
+            outline: none;
+            border-color: #ff8800;
+            box-shadow: 0 0 15px rgba(255, 136, 0, 0.5);
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+            color: #00ff88;
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 140px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn:hover {
+            background: rgba(0, 255, 136, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            border-color: #00ff88;
+            color: #00ff88;
+        }
+        
+        .btn-secondary {
+            border-color: #888;
+            color: #888;
+        }
+        
+        .btn-success {
+            border-color: #00ff88;
+            color: #00ff88;
+        }
+        
+        .btn-danger {
+            border-color: #ff4444;
+            color: #ff4444;
+        }
+        
+        .btn-danger:hover {
+            background: rgba(255, 68, 68, 0.2);
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.5);
+        }
+        
+        .algorithm-info {
+            background: rgba(255, 136, 0, 0.1);
+            border: 1px solid #ff8800;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: #ff8800;
+            font-weight: 400;
+        }
+        
+        .progress-container {
+            margin-bottom: 20px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 255, 136, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            border: 1px solid #00ff88;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #ff8800);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px #00ff88;
+        }
+        
+        .sequence-display {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .sequence-display h3 {
+            margin-bottom: 15px;
+            color: #00ff88;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .sequence-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .sequence-item {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .sequence-item.current {
+            background: rgba(255, 136, 0, 0.3);
+            border-color: #ff8800;
+            color: #ff8800;
+            box-shadow: 0 0 15px rgba(255, 136, 0, 0.5);
+            transform: scale(1.1);
+        }
+        
+        .sequence-item.processed {
+            background: rgba(136, 136, 136, 0.2);
+            border-color: #888;
+            color: #888;
+        }
+        
+        .simulation-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .cache-visualization {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff88;
+            border-radius: 10px;
+            padding: 25px;
+        }
+        
+        .cache-visualization h3 {
+            margin-bottom: 20px;
+            color: #00ff88;
+            text-align: center;
+            font-size: 1.4em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .cache-slots {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .cache-slot {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+            font-weight: 700;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', monospace;
+        }
+        
+        .cache-slot.hit {
+            background: rgba(0, 255, 136, 0.3);
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            animation: pulse-green 0.6s ease-in-out;
+        }
+        
+        .cache-slot.miss {
+            background: rgba(255, 68, 68, 0.3);
+            border-color: #ff4444;
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.5);
+            animation: pulse-red 0.6s ease-in-out;
+        }
+        
+        .cache-slot.empty {
+            background: rgba(136, 136, 136, 0.1);
+            border-color: #888;
+            color: #888;
+        }
+        
+        .cache-slot::before {
+            content: attr(data-index);
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            background: #00ff88;
+            color: #000;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @keyframes pulse-green {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(0, 255, 136, 0.8); }
+        }
+        
+        @keyframes pulse-red {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px rgba(255, 68, 68, 0.8); }
+        }
+        
+        .stats {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff88;
+            border-radius: 10px;
+            padding: 25px;
+        }
+        
+        .stats h3 {
+            margin-bottom: 20px;
+            color: #00ff88;
+            text-align: center;
+            font-size: 1.4em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.3);
+            font-weight: 400;
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: #888;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+        
+        .stat-value {
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+        
+        .hit-rate {
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88;
+        }
+        
+        .miss-rate {
+            color: #ff4444;
+            text-shadow: 0 0 10px #ff4444;
+        }
+        
+        .current-access {
+            text-align: center;
+            margin-top: 15px;
+            color: #ff8800;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .current-access-value {
+            color: #00ff88;
+            font-size: 1.2em;
+            text-shadow: 0 0 10px #00ff88;
+        }
+        
+        .warning {
+            background: rgba(255, 136, 0, 0.1);
+            border: 1px solid #ff8800;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #ff8800;
+            text-align: center;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        @media (max-width: 768px) {
+            .simulation-area {
+                grid-template-columns: 1fr;
+            }
+            
+            .cache-slots {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>CACHE MEMORY SIMULATOR</h1>
+            <div class="subtitle">ADVANCED REPLACEMENT ALGORITHM VISUALIZATION</div>
+            <div class="institution">Made By <a style="color: #00ff88;" href="https://github.com/Farhat-141"> Farhat agraine </a></div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>Cache Size (Words)</label>
+                <input type="number" id="cacheSize" value="8" min="4" max="16">
+            </div>
+            
+            <div class="control-group">
+                <label>Replacement Algorithm</label>
+                <select id="algorithm">
+                    <option value="FIFO">FIFO - First In First Out</option>
+                    <option value="LRU">LRU - Least Recently Used</option>
+                    <option value="LFU">LFU - Least Frequently Used</option>
+                    <option value="Random">Random Replacement</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label>Memory Address Sequence</label>
+                <input type="text" id="sequence" value="1,3,25,4,6,3,5,8,4,15,5,2,9,12,8,1" placeholder="1,3,25,4,6,3,5,8">
+            </div>
+        </div>
+        
+        <div class="buttons">
+            <button class="btn btn-primary" onclick="initializeSimulation()">Initialize</button>
+            <button class="btn btn-success" onclick="stepSimulation()">Step Forward</button>
+            <button class="btn btn-secondary" onclick="autoRun()">Auto Run</button>
+            <button class="btn btn-danger" onclick="resetSimulation()">Reset</button>
+        </div>
+        
+        <div class="algorithm-info" id="algorithmInfo"></div>
+        
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+        </div>
+        
+        <div class="sequence-display">
+            <h3>Memory Block Access Sequence</h3>
+            <div class="sequence-items" id="sequenceDisplay"></div>
+        </div>
+        
+        <div class="simulation-area">
+            <div class="cache-visualization">
+                <h3>Cache Memory State</h3>
+                <div class="cache-slots" id="cacheSlots"></div>
+                <div class="current-access">
+                    Current Access: <span class="current-access-value" id="currentAccess">-</span>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <h3>Performance Statistics</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Total Accesses:</span>
+                    <span class="stat-value" id="totalAccesses">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Cache Hits:</span>
+                    <span class="stat-value hit-rate" id="cacheHits">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Cache Misses:</span>
+                    <span class="stat-value miss-rate" id="cacheMisses">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Hit Rate:</span>
+                    <span class="stat-value hit-rate" id="hitRate">0.00%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Miss Rate:</span>
+                    <span class="stat-value miss-rate" id="missRate">0.00%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Algorithm:</span>
+                    <span class="stat-value" id="currentAlgorithm">FIFO</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class CacheSimulator {
+            constructor() {
+                this.cache = [];
+                this.cacheSize = 8;
+                this.algorithm = 'FIFO';
+                this.sequence = [];
+                this.currentIndex = 0;
+                this.hits = 0;
+                this.misses = 0;
+                this.accessTimes = new Map();
+                this.frequencies = new Map();
+                this.insertionOrder = [];
+                this.autoRunning = false;
+            }
+            
+            initialize(cacheSize, algorithm, sequence) {
+                this.cacheSize = parseInt(cacheSize);
+                this.algorithm = algorithm;
+                this.sequence = sequence.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x) && x > 0);
+                this.currentIndex = 0;
+                this.hits = 0;
+                this.misses = 0;
+                this.cache = [];
+                this.accessTimes.clear();
+                this.frequencies.clear();
+                this.insertionOrder = [];
+                this.updateDisplay();
+                this.updateAlgorithmInfo();
+            }
+            
+            step() {
+                if (this.currentIndex >= this.sequence.length) {
+                    if (this.autoRunning) {
+                        this.autoRunning = false;
+                    }
+                    return false;
+                }
+                
+                const address = this.sequence[this.currentIndex];
+                const isHit = this.cache.includes(address);
+                
+                if (isHit) {
+                    this.hits++;
+                    this.handleHit(address);
+                } else {
+                    this.misses++;
+                    this.handleMiss(address);
+                }
+                
+                this.currentIndex++;
+                this.updateDisplay();
+                return true;
+            }
+            
+            handleHit(address) {
+                this.accessTimes.set(address, Date.now());
+                this.frequencies.set(address, (this.frequencies.get(address) || 0) + 1);
+                
+                // Visual feedback
+                this.highlightCacheSlot(address, 'hit');
+            }
+            
+            handleMiss(address) {
+                this.accessTimes.set(address, Date.now());
+                this.frequencies.set(address, (this.frequencies.get(address) || 0) + 1);
+                
+                if (this.cache.length < this.cacheSize) {
+                    this.cache.push(address);
+                    this.insertionOrder.push(address);
+                } else {
+                    const evictedAddress = this.selectEvictionCandidate();
+                    const evictIndex = this.cache.indexOf(evictedAddress);
+                    this.cache[evictIndex] = address;
+                    
+                    // Update insertion order for FIFO
+                    if (this.algorithm === 'FIFO') {
+                        this.insertionOrder.shift();
+                        this.insertionOrder.push(address);
+                    }
+                }
+                
+                // Visual feedback
+                this.highlightCacheSlot(address, 'miss');
+            }
+            
+            selectEvictionCandidate() {
+                switch (this.algorithm) {
+                    case 'FIFO':
+                        return this.insertionOrder[0];
+                    case 'LRU':
+                        let lruAddress = this.cache[0];
+                        let oldestTime = this.accessTimes.get(lruAddress);
+                        for (let addr of this.cache) {
+                            if (!this.accessTimes.has(addr) || this.accessTimes.get(addr) < oldestTime) {
+                                oldestTime = this.accessTimes.get(addr);
+                                lruAddress = addr;
+                            }
+                        }
+                        return lruAddress;
+                    case 'LFU':
+                        let lfuAddress = this.cache[0];
+                        let minFreq = this.frequencies.get(lfuAddress) || 0;
+                        for (let addr of this.cache) {
+                            const freq = this.frequencies.get(addr) || 0;
+                            if (freq < minFreq) {
+                                minFreq = freq;
+                                lfuAddress = addr;
+                            }
+                        }
+                        return lfuAddress;
+                    case 'Random':
+                        return this.cache[Math.floor(Math.random() * this.cache.length)];
+                    default:
+                        return this.cache[0];
+                }
+            }
+            
+            highlightCacheSlot(address, type) {
+                const slots = document.querySelectorAll('.cache-slot');
+                slots.forEach((slot, index) => {
+                    if (this.cache[index] === address) {
+                        slot.classList.remove('hit', 'miss');
+                        slot.classList.add(type);
+                        setTimeout(() => slot.classList.remove(type), 1000);
+                    }
+                });
+            }
+            
+            updateDisplay() {
+                this.updateCacheDisplay();
+                this.updateStats();
+                this.updateSequenceDisplay();
+                this.updateProgress();
+            }
+            
+            updateCacheDisplay() {
+                const container = document.getElementById('cacheSlots');
+                container.innerHTML = '';
+                
+                for (let i = 0; i < this.cacheSize; i++) {
+                    const slot = document.createElement('div');
+                    slot.className = 'cache-slot';
+                    slot.setAttribute('data-index', i);
+                    
+                    if (i < this.cache.length && this.cache[i] !== undefined) {
+                        slot.textContent = this.cache[i];
+                    } else {
+                        slot.textContent = 'EMPTY';
+                        slot.classList.add('empty');
+                    }
+                    
+                    container.appendChild(slot);
+                }
+                
+                // Update current access
+                const currentAccess = this.currentIndex < this.sequence.length ? 
+                    this.sequence[this.currentIndex] : 'COMPLETE';
+                document.getElementById('currentAccess').textContent = currentAccess;
+            }
+            
+            updateStats() {
+                const total = this.hits + this.misses;
+                const hitRate = total > 0 ? (this.hits / total * 100).toFixed(2) : 0;
+                const missRate = total > 0 ? (this.misses / total * 100).toFixed(2) : 0;
+                
+                document.getElementById('totalAccesses').textContent = total;
+                document.getElementById('cacheHits').textContent = this.hits;
+                document.getElementById('cacheMisses').textContent = this.misses;
+                document.getElementById('hitRate').textContent = hitRate + '%';
+                document.getElementById('missRate').textContent = missRate + '%';
+                document.getElementById('currentAlgorithm').textContent = this.algorithm;
+            }
+            
+            updateSequenceDisplay() {
+                const container = document.getElementById('sequenceDisplay');
+                container.innerHTML = '';
+                
+                this.sequence.forEach((addr, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'sequence-item';
+                    item.textContent = addr;
+                    
+                    if (index === this.currentIndex) {
+                        item.classList.add('current');
+                    } else if (index < this.currentIndex) {
+                        item.classList.add('processed');
+                    }
+                    
+                    container.appendChild(item);
+                });
+            }
+            
+            updateProgress() {
+                const progress = this.sequence.length > 0 ? 
+                    (this.currentIndex / this.sequence.length * 100) : 0;
+                document.getElementById('progressFill').style.width = progress + '%';
+            }
+            
+            updateAlgorithmInfo() {
+                const info = document.getElementById('algorithmInfo');
+                const descriptions = {
+                    'FIFO': 'FIFO (First In First Out): Replaces the oldest cache line. Simple implementation but may not consider access patterns optimally.',
+                    'LRU': 'LRU (Least Recently Used): Replaces the line that has not been accessed for the longest time. Exploits temporal locality effectively.',
+                    'LFU': 'LFU (Least Frequently Used): Replaces the line with the lowest access frequency. Effective for detecting and adapting to access patterns.',
+                    'Random': 'Random Replacement: Selects a random cache line for replacement. Simple implementation with unpredictable performance characteristics.'
+                };
+                
+                info.innerHTML = `<strong>ALGORITHM:</strong> ${descriptions[this.algorithm]}`;
+            }
+        }
+        
+        const simulator = new CacheSimulator();
+        
+        function initializeSimulation() {
+            const cacheSize = document.getElementById('cacheSize').value;
+            const algorithm = document.getElementById('algorithm').value;
+            const sequence = document.getElementById('sequence').value;
+            
+            simulator.initialize(cacheSize, algorithm, sequence);
+        }
+        
+        function stepSimulation() {
+            if (!simulator.step() && simulator.autoRunning) {
+                simulator.autoRunning = false;
+            }
+        }
+        
+        function autoRun() {
+            if (simulator.autoRunning) {
+                simulator.autoRunning = false;
+                return;
+            }
+            
+            simulator.autoRunning = true;
+            function runStep() {
+                if (simulator.autoRunning && simulator.step()) {
+                    setTimeout(runStep, 800);
+                }
+            }
+            runStep();
+        }
+        
+        function resetSimulation() {
+            simulator.autoRunning = false;
+            initializeSimulation();
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSimulation();
+        });
+        
+        // Update algorithm info when selection changes
+        document.getElementById('algorithm').addEventListener('change', function() {
+            simulator.algorithm = this.value;
+            simulator.updateAlgorithmInfo();
+        });
+    </script>
+</body>
+</html>
