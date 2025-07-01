@@ -1,6 +1,7 @@
 # CACHE MEMORY SIMULATOR
 
 ![MIT License](https://img.shields.io/badge/license-MIT-green) ![Status](https://img.shields.io/badge/status-active-brightgreen)
+
 **An interactive web-based tool for simulating and visualizing cache memory replacement algorithms.**
 
 ## Overview
