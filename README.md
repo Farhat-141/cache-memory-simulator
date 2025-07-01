@@ -95,3 +95,14 @@ This tool is ideal for:
 ## Author
 
 Developed by [Farhat Agraine](https://github.com/Farhat-141)
+
+
+---
+
+### Optional Enhancements You Can Add
+
+- **GitHub Pages hosting**: You can enable this in the repo settings and set the homepage URL.
+- **Badges** (example):
+```md
+![MIT License](https://img.shields.io/badge/license-MIT-green)
+![Status](https://img.shields.io/badge/status-active-brightgreen)
